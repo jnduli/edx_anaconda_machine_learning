@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 
+from sklearn import linear_model 
 matplotlib.style.use('ggplot') # Look Pretty
 
 
@@ -34,17 +35,14 @@ def drawLine(model, X_test, y_test, title):
 # spread sheet application
 #
 # .. your code here ..
-
-
+data = pd.read_csv('Datasets/life_expectancy.csv', delimiter='\t')
 #
 # TODO: Create your linear regression model here and store it in a
 # variable called 'model'. Don't actually train or do anything else
 # with it yet:
 #
 # .. your code here ..
-
-
-
+model = linear_model.LinearRegression()
 #
 # TODO: Slice out your data manually (e.g. don't use train_test_split,
 # but actually do the Indexing yourself. Set X_train to be year values
@@ -54,8 +52,9 @@ def drawLine(model, X_test, y_test, title):
 # of this document before proceeding.
 #
 # .. your code here ..
-
-
+X_train = data[data.Year<1986]
+y_train = X_train['WhiteMale'].copy()
+X_train = X_train.drop(labels=['WhiteMale','WhiteFemale','BlackMale','BlackFemale'], axis=1)
 
 #
 # TODO: Train your model then pass it into drawLine with your training
@@ -66,14 +65,17 @@ def drawLine(model, X_test, y_test, title):
 # 2030 and 2045 extrapolation.
 #
 # .. your code here ..
-
-
+model.fit(X_train, y_train)
+print X_train.size
+print y_train.size
+drawLine(model, X_train, y_train, 'WhiteMale')
 #
 # TODO: Print the actual 2014 WhiteMale life expectancy from your
 # loaded dataset
 #
 # .. your code here ..
-
+print "White male 2014 : "
+print model.predict([2014])
 
 
 # 
@@ -83,8 +85,13 @@ def drawLine(model, X_test, y_test, title):
 # BlackFemale life expectancy
 #
 # .. your code here ..
-
-
+X_train = data[data.Year<1986]
+y_train = X_train['BlackFemale'].copy()
+X_train = X_train.drop(labels=['WhiteMale','WhiteFemale','BlackMale','BlackFemale'], axis=1)
+model.fit(X_train, y_train)
+#drawLine(model, X_train, y_train, '')
+print "Black Female 2014 : "
+print  model.predict([2014])
 
 #
 # TODO: Lastly, print out a correlation matrix for your entire
@@ -93,6 +100,13 @@ def drawLine(model, X_test, y_test, title):
 # the course
 #
 # .. your code here ..
+
+print data.corr()
+plt.imshow(data.corr(), cmap=plt.cm.Blues, interpolation='nearest')
+plt.colorbar()
+tick_marks = [i for i in range(len(data.columns))]
+plt.xticks(tick_marks, data.columns, rotation='vertical')
+plt.yticks(tick_marks, data.columns)
 
 plt.show()
 

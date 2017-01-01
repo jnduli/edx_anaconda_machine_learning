@@ -3,6 +3,9 @@ import numpy as np
 import scipy.io
 import random, math
 
+from sklearn.decomposition import PCA
+from sklearn.manifold import Isomap
+
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 
@@ -28,6 +31,31 @@ def Plot2D(T, title, x, y, num_to_plot=40):
 
 
 
+def Plot3D(T, title, x, y,z, num_to_plot=40):
+  # This method picks a bunch of random samples (images in your case)
+  # to plot onto the chart:
+
+  fig = plt.figure()
+  ax = fig.add_subplot(111, projection='3d')
+  ax.set_title(title)
+  ax.set_xlabel('Component: {0}'.format(x))
+  ax.set_ylabel('Component: {0}'.format(y))
+  ax.set_zlabel('Component: {0}'.format(z))
+  x_size = (max(T[:,x]) - min(T[:,x])) * 0.08
+  y_size = (max(T[:,y]) - min(T[:,y])) * 0.08
+  z_size = (max(T[:,z]) - min(T[:,z])) * 0.08
+  for i in range(num_to_plot):
+    img_num = int(random.random() * num_images)
+    x0, y0, z0 = T[img_num,x]-x_size/2., T[img_num,y]-y_size/2.,T[img_num,z]-z_size/2.
+    x1, y1, z1 = T[img_num,x]+x_size/2., T[img_num,y]+y_size/2.,T[img_num,z]+z_size/2.
+    img = df.iloc[img_num,:].reshape(num_pixels, num_pixels)
+    ax.imshow(img, aspect='auto', cmap=plt.cm.gray, interpolation='nearest', zorder=100000, extent=(x0, x1, y0, y1))
+
+  # It also plots the full scatter:
+  ax.scatter(T[:,x],T[:,y],T[:,z], marker='.',alpha=0.7)
+
+
+
 # A .MAT file is a .MATLAB file. The faces dataset could have came
 # in through .png images, but we'll show you how to do that in
 # anither lab. For now, you'll see how to import .mats:
@@ -36,6 +64,10 @@ df = pd.DataFrame(mat['images']).T
 num_images, num_pixels = df.shape
 num_pixels = int(math.sqrt(num_pixels))
 
+
+
+#print df.dtypes
+print df.size
 # Rotate the pictures, so we don't have to crane our necks:
 for i in range(num_images):
   df.loc[i,:] = df.loc[i,:].reshape(num_pixels, num_pixels).T.reshape(-1)
@@ -53,6 +85,9 @@ for i in range(num_images):
 #
 # .. your code here ..
 
+pca = PCA(n_components=3)
+pca.fit(df)
+#Plot2D(pca.transform(df),'PCA',0,1)
 
 #
 # TODO: Implement Isomap here. Reduce the dataframe df down
@@ -61,6 +96,9 @@ for i in range(num_images):
 #
 # .. your code here ..
 
+iso = Isomap(n_neighbors=3, n_components=3)
+iso.fit(df)
+#Plot2D(iso.transform(df), 'ISO', 1,2)
 
 #
 # TODO: If you're up for a challenge, draw your dataframes in 3D
@@ -68,5 +106,6 @@ for i in range(num_images):
 #
 # .. your code here ..
 
+#Plot3D(iso.transform(df), 'ISO', 0,1,2)
 
 plt.show()

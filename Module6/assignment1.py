@@ -11,7 +11,7 @@ import time
 # You can adjust them after completing the lab
 C = 1
 kernel = 'linear'
-iterations = 5000   # TODO: Change to 200000 once you get to Question#2
+iterations = 200000   # TODO: Change to 200000 once you get to Question#2
 
 #
 # INFO: You can set this to false if you want to
@@ -94,22 +94,30 @@ def drawPlots(model, wintitle='Figure 1'):
 def benchmark(model, wintitle='Figure 1'):
   print '\n\n' + wintitle + ' Results'
   s = time.time()
+  stime =0
   for i in range(iterations):
     #
     # TODO: train the classifier on the training data / labels:
     #
     # .. your code here ..
-  print "{0} Iterations Training Time: ".format(iterations), time.time() - s
+      #print "{0} Iterations Training Time: ".format(i), time.time() - s
+      model.fit(X_train, y_train)
+      stime = stime + (time.time()-s)
 
-
+  print "Trainging Time total is ", stime
+  stime =0
   s = time.time()
-  for i in range(iterations):
-    #
-    # TODO: score the classifier on the testing data / labels:
-    #
-    # .. your code here ..
-  print "{0} Iterations Scoring Time: ".format(iterations), time.time() - s
-  print "High-Dimensionality Score: ", round((score*100), 3)
+  for j in range(iterations):
+        #
+        # TODO: score the classifier on the testing data / labels:
+        #
+        # .. your code here ..
+    score = model.score(X_test, y_test)
+    stime = stime + (time.time()-s)
+    #print "{0} Iterations Scoring Time: ".format(j), time.time() - s
+    #print "High-Dimensionality Score: ", round((score*100), 3)
+
+  print "Scoring Time Total is ",stime
 
 
 
@@ -119,11 +127,10 @@ def benchmark(model, wintitle='Figure 1'):
 # Indices shouldn't be doubled, nor weird headers...
 #
 # .. your code here ..
-
-
+X= pd.read_csv('Datasets/wheat.data', index_col=0)
 # INFO: An easy way to show which rows have nans in them
-#print X[pd.isnull(X).any(axis=1)]
-
+X = X.dropna()
+print X[pd.isnull(X).any(axis=1)]
 
 # 
 # TODO: Go ahead and drop any row with a nan
@@ -146,7 +153,9 @@ def benchmark(model, wintitle='Figure 1'):
 # you in Module 5 -- canadian:0, kama:1, and rosa:2
 #
 # .. your code here ..
-
+y = X['wheat_type'].copy()
+X = X.drop(labels = ['wheat_type'], axis=1)
+y = y.map({'canadian':0, 'kama':1, 'rosa':2})
 
 
 # 
@@ -155,14 +164,18 @@ def benchmark(model, wintitle='Figure 1'):
 # Use variable names: X_train, X_test, y_train, y_test
 #
 # .. your code here ..
-
-
+from sklearn.cross_validation import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=7)
 
 #
 # TODO: Create an SVC classifier named svc
 # Use a linear kernel, and set the C value to C
 #
 # .. your code here ..
+from sklearn.svm import SVC
+svc = SVC(kernel='linear', C=C)
+svc.fit(X_train, y_train)
+#model.fit(X, y) 
 
 
 #
@@ -170,18 +183,20 @@ def benchmark(model, wintitle='Figure 1'):
 # Set the neighbor count to 5
 #
 # .. your code here ..
+from sklearn.neighbors import KNeighborsClassifier
+knn = KNeighborsClassifier(n_neighbors=5)
+knn.fit(X_train, y_train)
 
 
-
-
-
+print "Knn tests"
 benchmark(knn, 'KNeighbors')
-drawPlots(knn, 'KNeighbors')
+#drawPlots(knn, 'KNeighbors')
 
+print "Svc test"
 benchmark(svc, 'SVC')
-drawPlots(svc, 'SVC')
+#drawPlots(svc, 'SVC')
 
-plt.show()
+#plt.show()
 
 
 

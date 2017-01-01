@@ -1,3 +1,19 @@
+import random, math
+import pandas as pd
+import numpy as np
+import scipy.io
+
+from sklearn.cross_validation import train_test_split
+from sklearn.decomposition import PCA
+from sklearn.manifold import Isomap
+from sklearn.neighbors import KNeighborsClassifier
+
+from mpl_toolkits.mplot3d import Axes3D
+import matplotlib
+import matplotlib.pyplot as plt
+
+from sklearn import preprocessing
+
 # If you'd like to try this lab with PCA instead of Isomap,
 # as the dimensionality reduction technique:
 Test_PCA = True
@@ -59,6 +75,8 @@ def plotDecisionBoundary(model, X, y):
 #
 # .. your code here ..
 
+X = pd.read_csv('Datasets/breast-cancer-wisconsin.data', names=['sample', 'thickness', 'size', 'shape', 'adhesion', 'epithelial', 'nuclei', 'chromatin', 'nucleoli', 'mitoses', 'status'])
+X.nuclei = pd.to_numeric(X.nuclei, errors='coerce')
 
 # 
 # TODO: Copy out the status column into a slice, then drop it from the main
@@ -66,15 +84,15 @@ def plotDecisionBoundary(model, X, y):
 # us with any machine learning power.
 #
 # .. your code here ..
-
+y = X['status'].copy()
+X.drop(labels='status',axis=1, inplace=True)
 
 #
 # TODO: With the labels safely extracted from the dataset, replace any nan values
 # with the mean feature / column value
 #
 # .. your code here ..
-
-
+X.fillna(X.mean(), inplace=True)
 #
 # TODO: Experiment with the basic SKLearn preprocessing scalers. We know that
 # the features consist of different units mixed in together, so it's reasonable
@@ -82,16 +100,15 @@ def plotDecisionBoundary(model, X, y):
 # dataset, post transformation.
 #
 # .. your code here ..
-
-
+normalizer = preprocessing.Normalizer().fit(X)
+X=normalizer.transform(X)
 #
 # TODO: Do train_test_split. Use the same variable names as on the EdX platform in
 # the reading material, but set the random_state=7 for reproduceability, and keep
 # the test_size at 0.33 (33%).
 #
 # .. your code here ..
-
-
+data_train, data_test, label_train, label_test = train_test_split(X, y, test_size=0.33, random_state=7)
 
 #
 # PCA and Isomap are your new best friends
@@ -104,6 +121,8 @@ if Test_PCA:
   #
   # .. your code here ..
   
+  model =PCA(n_components=2)
+  model.fit(data_train)
 
 else:
   print "Computing 2D Isomap Manifold"
@@ -113,8 +132,9 @@ else:
   # You should reduce down to two dimensions.
   #
   # .. your code here ..
-
-
+  model = Isoman(n_neighbors=4, n_components=2)
+  model.fit(data_train)
+  
 
 #
 # TODO: Train your model against data_train, then transform both
@@ -122,8 +142,8 @@ else:
 # back into the variables themselves.
 #
 # .. your code here ..
-
-
+data_train = model.transform(data_train)
+data_test = model.transform(data_test)
 # 
 # TODO: Implement and train KNeighborsClassifier on your projected 2D
 # training data here. You can use any K value from 1 - 15, so play around
@@ -133,6 +153,9 @@ else:
 # parameter affects the results.
 #
 # .. your code here ..
+
+model = KNeighborsClassifier(n_neighbors=6, weights='distance')
+model.fit(data_train, label_train)
 
 #
 # INFO: Be sure to always keep the domain of the problem in mind! It's
@@ -151,7 +174,8 @@ else:
 #
 # .. your code here ..
 
+print model.score(data_test, label_test)
 
-plotDecisionBoundary(model, data_test, label_test)
+#plotDecisionBoundary(model, data_test, label_test)
 
 

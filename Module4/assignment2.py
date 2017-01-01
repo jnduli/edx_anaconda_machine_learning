@@ -2,13 +2,14 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib
 import assignment2_helper as helper
+from sklearn.decomposition import PCA
 
 # Look pretty...
 matplotlib.style.use('ggplot')
 
 
 # Do * NOT * alter this line, until instructed!
-scaleFeatures = False
+scaleFeatures = True
 
 
 # TODO: Load up the dataset and remove any and all
@@ -16,7 +17,8 @@ scaleFeatures = False
 # by now ;-)
 #
 # .. your code here ..
-
+df = pd.read_csv('Datasets/kidney_disease.csv')
+df = df.dropna()
 
 
 # Create some color coded labels; the actual label feature
@@ -29,7 +31,7 @@ labels = ['red' if i=='ckd' else 'green' for i in df.classification]
 #       ['bgr','wc','rc']
 #
 # .. your code here ..
-
+df = df.loc[:,['bgr','wc','rc']]
 
 
 # TODO: Print out and check your dataframe's dtypes. You'll probably
@@ -43,20 +45,24 @@ labels = ['red' if i=='ckd' else 'green' for i in df.classification]
 # properly detect and convert them to that data type for you, then use
 # an appropriate command to coerce these features into the right type.
 #
-# .. your code here ..
-
+# .. your code here
+print df
+df.wc = pd.to_numeric(df.wc, errors='coerce')
+df.rc = pd.to_numeric(df.rc, errors='coerce')
 
 
 # TODO: PCA Operates based on variance. The variable with the greatest
 # variance will dominate. Go ahead and peek into your data using a
 # command that will check the variance of every feature in your dataset.
 # Print out the results. Also print out the results of running .describe
-# on your dataset.
+# on your dataset.jj
 #
 # Hint: If you don't see all three variables: 'bgr','wc' and 'rc', then
 # you probably didn't complete the previous step properly.
 #
-# .. your code here ..
+# .. your code here .
+print df.var()
+print df.describe()
 
 
 
@@ -74,7 +80,9 @@ if scaleFeatures: df = helper.scaleFeatures(df)
 # and that the results of your transformation are saved in 'T'.
 #
 # .. your code here ..
-
+pca = PCA(n_components=2)
+pca.fit(df)
+T = pca.transform(df)
 
 # Plot the transformed data as a scatter plot. Recall that transforming
 # the data will result in a NumPy NDArray. You can either use MatPlotLib
@@ -86,6 +94,7 @@ if scaleFeatures: df = helper.scaleFeatures(df)
 #
 # Since we transformed via PCA, we no longer have column names. We know we
 # are in P.C. space, so we'll just define the coordinates accordingly:
+
 ax = helper.drawVectors(T, pca.components_, df.columns.values, plt, scaleFeatures)
 T = pd.DataFrame(T)
 T.columns = ['component1', 'component2']

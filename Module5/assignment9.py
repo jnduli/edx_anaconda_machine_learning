@@ -3,6 +3,8 @@ import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+from sklearn import linear_model 
+from sklearn.cross_validation import train_test_split
 
 matplotlib.style.use('ggplot') # Look Pretty
 
@@ -84,8 +86,7 @@ def drawPlane(model, X_test, y_test, title, R2):
 # called X:
 #
 # .. your code here ..
-
-
+data = pd.read_csv('Datasets/College.csv', index_col=0)
 #
 # INFO: This line isn't necessary for your purposes; but we'd just
 # like to show you an additional way to encode features directly.
@@ -94,8 +95,8 @@ def drawPlane(model, X_test, y_test, title, R2):
 # If you decide to embark on the "Data Scientist Challenge", this
 # line of code will save you the trouble of converting it through
 # other means:
-X.Private = X.Private.map({'Yes':1, 'No':0})
-
+data.Private = data.Private.map({'Yes':1, 'No':0})
+print data.dtypes
 
 #
 # TODO: Create your linear regression model here and store it in a
@@ -103,8 +104,7 @@ X.Private = X.Private.map({'Yes':1, 'No':0})
 # with it yet:
 #
 # .. your code here ..
-
-
+model = linear_model.LinearRegression()
 
 
 #
@@ -125,18 +125,25 @@ X.Private = X.Private.map({'Yes':1, 'No':0})
 # and your input will be the accepted students amount.
 #
 # .. your code here ..
+y_train = data['Room.Board'].copy()
+X_train = data['Accept'].copy()
+X_train = X_train.reshape(-1,1)
+data_train, data_test, label_train, label_test = train_test_split(X_train, y_train, test_size=0.3, random_state=7)
+
 
 #
 # TODO: Fit and score your model appropriately. Store the score in the
 # score variable.
 #
 # .. your code here ..
-
+print data_train.size
+print label_train.size
+model.fit(data_train, label_train)
+print "Room Board vs Accept"
+score = model.score(data_test, label_test)
+print score
 # INFO: We'll take it from here, buddy:
-drawLine(model, X_test, y_test, "Accept(Room&Board)", score)
-
-
-
+drawLine(model, data_test, label_test, "Accept(Room&Board)", score)
 
 # 
 # TODO: Duplicate the process above; this time, model the number of
@@ -144,9 +151,15 @@ drawLine(model, X_test, y_test, "Accept(Room&Board)", score)
 # students
 #
 # .. your code here ..
-drawLine(model, X_test, y_test, "Accept(Enroll)", score)
-
-
+y_train = data['Enroll'].copy()
+X_train = data['Accept'].copy()
+X_train = X_train.reshape(-1,1)
+data_train, data_test, label_train, label_test = train_test_split(X_train, y_train, test_size=0.3, random_state=7)
+model.fit(data_train, label_train)
+print "Enroll vs Accept"
+score= model.score(data_test, label_test)
+print score
+drawLine(model, data_test, data_test, "Accept(Enroll)", score)
 
 # 
 # TODO: Duplicate the process above; this time, model the number of
@@ -154,7 +167,15 @@ drawLine(model, X_test, y_test, "Accept(Enroll)", score)
 # of accepted students
 #
 # .. your code here ..
-drawLine(model, X_test, y_test, "Accept(F.Undergrad)", score)
+y_train = data['F.Undergrad'].copy()
+X_train = data['Accept'].copy()
+X_train = X_train.reshape(-1,1)
+data_train, data_test, label_train, label_test = train_test_split(X_train, y_train, test_size=0.3, random_state=7)
+model.fit(data_train, label_train)
+print "Failed Undergrad vs Accept"
+score=  model.score(data_test, label_test)
+print score
+drawLine(model, data_test, data_test, "Accept(F.Undergrad)", score)
 
 
 #
@@ -170,8 +191,15 @@ drawLine(model, X_test, y_test, "Accept(F.Undergrad)", score)
 # inputs. Your training labels will remain a single slice.
 #
 # .. your code here ..
-drawPlane(model, X_test, y_test, "Accept(Room&Board,Enroll)", score)
-
+X_train = data[['Room.Board','Enroll']].copy()
+y_train = data['Accept'].copy()
+#X_train = X_train.reshape(-1,1)
+data_train, data_test, label_train, label_test = train_test_split(X_train, y_train, test_size=0.3, random_state=7)
+model.fit(data_train, label_train)
+print "Room and Enroll vs Accept"
+score =model.score(data_test, label_test)
+print score
+drawPlane(model, data_test, label_test, "Accept(Room&Board,Enroll)", score)
 
 #
 # INFO: That concludes this assignment

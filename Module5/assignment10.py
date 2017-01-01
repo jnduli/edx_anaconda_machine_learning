@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+from sklearn import linear_model 
 
 import scipy.io.wavfile as wavfile
 
@@ -51,9 +52,11 @@ Provided_Portion = 0.25
 # just the data!) to your Python list 'zero':
 #
 # .. your code here ..
-
-
-
+zero = []
+for i in range(50):
+    sample_rate, audio_data = wavfile.read("Datasets/free-spoken-digit-dataset-master/recordings/0_jackson_"+str(i)+".wav"
+)
+    zero.append(audio_data)
 # 
 # TODO: Just for a second, convert zero into a DataFrame. When you do
 # so, set the dtype to np.int16, since the input audio files are 16
@@ -70,7 +73,9 @@ Provided_Portion = 0.25
 #
 # .. your code here ..
 
-
+df =pd.DataFrame(data=zero, dtype=np.int16)
+df = df.dropna(axis=1)
+zero = df.as_matrix()
 #
 # TODO: It's important to know how (many audio_samples samples) long the
 # data is now. 'zero' is currently shaped [n_samples, n_audio_samples],
@@ -78,8 +83,7 @@ Provided_Portion = 0.25
 # n_audio_samples
 #
 # .. your code here ..
-
-
+n_audio_samples = zero.shape[1]#len(zero[:,0])
 
 #
 # TODO: Create your linear regression model here and store it in a
@@ -87,9 +91,7 @@ Provided_Portion = 0.25
 # with it yet:
 #
 # .. your code here ..
-
-
-
+model = linear_model.LinearRegression()
 #
 # INFO: There are 50 takes of each clip. You want to pull out just one
 # of them, randomly, and that one will NOT be used in the training of
@@ -102,8 +104,6 @@ random_idx = rng.randint(zero.shape[0])
 test  = zero[random_idx]
 train = np.delete(zero, [random_idx], axis=0)
 
-
-
 # 
 # TODO: Print out the shape of train, and the shape of test
 # train will be shaped: [n_samples, n_audio_samples], where
@@ -112,9 +112,7 @@ train = np.delete(zero, [random_idx], axis=0)
 # sample (audio file, e.g. observation).
 #
 # .. your code here ..
-
-
-
+print train.shape
 #
 # INFO: The test data will have two parts, X_test and y_test. X_test is
 # going to be the first portion of the test audio file, which we will
@@ -132,8 +130,6 @@ train = np.delete(zero, [random_idx], axis=0)
 # when you were loading up the .wav files:
 wavfile.write('Original Test Clip.wav', sample_rate, test)
 
-
-
 #
 # TODO: Prepare the TEST date by creating a slice called X_test. It
 # should have Provided_Portion * n_audio_samples audio sample features,
@@ -142,8 +138,9 @@ wavfile.write('Original Test Clip.wav', sample_rate, test)
 # n_audio_samples audio features from test and store it in X_test.
 #
 # .. your code here ..
+print test.shape
 
-
+X_test = test[:np.ceil(Provided_Portion*n_audio_samples)]
 #
 # TODO: If the first Provided_Portion * n_audio_samples features were
 # stored in X_test, then we need to also grab the *remaining* audio
@@ -153,8 +150,7 @@ wavfile.write('Original Test Clip.wav', sample_rate, test)
 #
 # .. your code here ..
 
-
-
+y_test = test[np.floor(Provided_Portion*n_audio_samples):]
 
 # 
 # TODO: Duplicate the same process for X_train, y_train. The only
@@ -167,9 +163,9 @@ wavfile.write('Original Test Clip.wav', sample_rate, test)
 # accomplishable using regular indexing in two lines of code.
 #
 # .. your code here ..
-
-
-
+varsi = n_audio_samples#train.shape[1]
+X_train = train[:, :np.ceil(Provided_Portion*varsi)]
+y_train = train[:, np.floor(Provided_Portion*varsi):] 
 # 
 # TODO: SciKit-Learn gets mad if you don't supply your training
 # data in the form of a 2D arrays: [n_samples, n_features].
@@ -183,20 +179,21 @@ wavfile.write('Original Test Clip.wav', sample_rate, test)
 # [n_samples] into [n_samples, 1]:
 #
 # .. your code here ..
-
+X_test = X_test.reshape(1,-1)
+y_test = y_test.reshape(1,-1)
 
 #
 # TODO: Fit your model using your training data and label:
 #
 # .. your code here ..
-
+model.fit(X_train, y_train)
 
 # 
 # TODO: Use your model to predict the 'label' of X_test. Store the
 # resulting prediction in a variable called y_test_prediction
 #
 # .. your code here ..
-
+y_test_prediction = model.predict(X_test)
 
 # INFO: SciKit-Learn will use float64 to generate your predictions
 # so let's take those values back to int16:
@@ -209,6 +206,7 @@ y_test_prediction = y_test_prediction.astype(dtype=np.int16)
 # by passing in your test data and test label (y_test).
 #
 # .. your code here ..
+score = model.score(X_test, y_test)
 print "Extrapolation R^2 Score: ", score
 
 

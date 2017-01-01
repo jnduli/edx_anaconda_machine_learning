@@ -2,6 +2,7 @@ import pandas as pd
 from datetime import timedelta
 import matplotlib.pyplot as plt
 import matplotlib
+from sklearn.cluster import KMeans
 
 matplotlib.style.use('ggplot') # Look Pretty
 
@@ -14,7 +15,7 @@ matplotlib.style.use('ggplot') # Look Pretty
 def showandtell(title=None):
   if title != None: plt.savefig(title + ".png", bbox_inches='tight', dpi=300)
   plt.show()
-  exit()
+  #exit()
 
 def clusterInfo(model):
   print "Cluster Analysis Inertia: ", model.inertia_
@@ -36,7 +37,6 @@ def clusterWithFewestSamples(model):
   print "\n  Cluster With Fewest Samples: ", minCluster
   return (model.labels_==minCluster)
 
-
 def doKMeans(data, clusters=0):
   #
   # TODO: Be sure to only feed in Lat and Lon coordinates to the KMeans algo, since none of the other
@@ -47,8 +47,20 @@ def doKMeans(data, clusters=0):
   # Hint: Make sure you fit ONLY the coordinates, and in the CORRECT order (lat first).
   # This is part of your domain expertise.
   #
-  # .. your code here ..
-  return model
+  # base  fig = plt.figure()
+  #fig = plt.figure()
+  #ax = fig.add_subplot(111)
+  #ax.scatter(data.TowerLat, data.TowerLon, marker='.', alpha=0.3)
+
+  df = data.loc[:,['TowerLat','TowerLon']]
+  kmeans_model = KMeans(n_clusters=clusters)
+  kmeans_model.fit(df)
+
+  centroids = kmeans_model.cluster_centers_
+  #ax.scatter(centroids[:,0], centroids[:,1], marker='x', c='red', alpha=0.5, linewidths=3, s=169)
+  print centroids
+
+  return kmeans_model
 
 
 
@@ -58,18 +70,17 @@ def doKMeans(data, clusters=0):
 #
 # .. your code here ..
 
-
-
-
-
+df = pd.read_csv('Datasets/CDR.csv')
+df.CallDate = pd.to_datetime(df.CallDate, errors='coerce')
+df.CallTime = pd.to_timedelta(df.CallTime, errors='coerce')
 #
 # TODO: Get a distinct list of "In" phone numbers (users) and store the values in a
 # regular python list.
 # Hint: https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.tolist.html
 #
 # .. your code here ..
-
-
+InList = df.In.unique().tolist()
+print InList
 #
 # INFO: The locations map above should be too "busy" to really wrap your head around. This
 # is where domain expertise comes into play. Your intuition tells you that people are likely
@@ -87,21 +98,32 @@ def doKMeans(data, clusters=0):
 #   3. They probably spend time commuting between work and home everyday
 
 
+for user in InList:
+    print "Examining person"
+    user1 = df[df.In == user]
+    print user1.In.unique()
+    user1 = user1[pd.DatetimeIndex(user1.CallDate).weekday < 5]
+    user1 = user1[ (user1.CallTime< pd.to_timedelta('17:00:00'))] #& (user1.CallTime> pd.to_timedelta('07:30:00'))]
+    model = doKMeans(user1, 3)
+    midWayClusterIndices = clusterWithFewestSamples(model)
+    midWaySamples = user1[midWayClusterIndices]
+    print "    Its Waypoint Time: ", midWaySamples.CallTime.mean()
+    print "done for user"
+    #ax.scatter(model.cluster_centers_[:,1], model.cluster_centers_[:,0], s=169, c='r', marker='x', alpha=0.8, linewidths=2)
 
-
-print "\n\nExamining person: ", 0
+#print "\n\nExamining person: ", 0
 # 
 # TODO: Create a slice called user1 that filters to only include dataset records where the
 # "In" feature (user phone number) is equal to the first number on your unique list above
 #
 # .. your code here ..
-
+#user1= df[df.In == InList[0]]
 
 #
 # TODO: Alter your slice so that it includes only Weekday (Mon-Fri) values.
 #
 # .. your code here ..
-
+#user1 = user1[pd.DatetimeIndex(user1.CallDate).weekday < 5]
 
 #
 # TODO: The idea is that the call was placed before 5pm. From Midnight-730a, the user is
@@ -110,14 +132,18 @@ print "\n\nExamining person: ", 0
 # So the assumption is that most of the time is spent either at work, or in 2nd, at home.
 #
 # .. your code here ..
-
+#user1 = user1[ (user1.CallTime< pd.to_timedelta('17:00:00'))] #& (user1.CallTime> pd.to_timedelta('07:30:00'))]
 
 #
 # TODO: Plot the Cell Towers the user connected to
 #
 # .. your code here ..
 
-
+#fig = plt.figure()
+#ax = fig.add_subplot(111)
+#ax.scatter(user1.TowerLon, user1.TowerLat, c='g', marker='o', alpha=0.2)
+#ax.set_title('Weekday calls from 7.30 - 5.00pm')
+#showandtell()
 
 #
 # INFO: Run K-Means with K=3 or K=4. There really should only be a two areas of concentration. If you
@@ -126,7 +152,7 @@ print "\n\nExamining person: ", 0
 # sweep up the annoying outliers and not-home, not-work travel occasions. the other two will zero in
 # on the user's approximate home location and work locations. Or rather the location of the cell
 # tower closest to them.....
-model = doKMeans(user1, 3)
+#model = doKMeans(user1, 3)
 
 
 #
@@ -135,15 +161,15 @@ model = doKMeans(user1, 3)
 # The cluster with the 2nd most samples will be home. And the K=3 cluster with the least samples
 # should be somewhere in between the two. What time, on average, is the user in between home and
 # work, between the midnight and 5pm?
-midWayClusterIndices = clusterWithFewestSamples(model)
-midWaySamples = user1[midWayClusterIndices]
-print "    Its Waypoint Time: ", midWaySamples.CallTime.mean()
+#midWayClusterIndices = clusterWithFewestSamples(model)
+#midWaySamples = user1[midWayClusterIndices]
+#print "    Its Waypoint Time: ", midWaySamples.CallTime.mean()
 
 
 #
 # Let's visualize the results!
 # First draw the X's for the clusters:
-ax.scatter(model.cluster_centers_[:,1], model.cluster_centers_[:,0], s=169, c='r', marker='x', alpha=0.8, linewidths=2)
+#ax.scatter(model.cluster_centers_[:,1], model.cluster_centers_[:,0], s=169, c='r', marker='x', alpha=0.8, linewidths=2)
 #
 # Then save the results:
-showandtell('Weekday Calls Centroids')  # Comment this line out when you're ready to proceed
+#showandtell('Weekday Calls Centroids')  # Comment this line out when you're ready to proceed

@@ -1,3 +1,7 @@
+These are my solutions to the problems of the EDX machine learning
+course. The details are found below.
+
+
 # DAT210x
 Programming with Python for Data Science Microsoft
 

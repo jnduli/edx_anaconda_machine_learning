@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from sklearn import preprocessing
+from sklearn.cluster import KMeans
 
 import matplotlib.pyplot as plt
 import matplotlib
@@ -60,7 +61,10 @@ def doKMeans(data, clusters=0):
   # and fit it against your data. Then, return a tuple containing the cluster
   # centers and the labels
   #
-  # .. your code here ..
+  # .. your code here 
+  model = KMeans(n_clusters=clusters)
+  model.fit(data)
+
   return model.cluster_centers_, model.labels_
 
 
@@ -71,6 +75,8 @@ def doKMeans(data, clusters=0):
 # on it.
 #
 # .. your code here ..
+df = pd.read_csv('Datasets/Wholesale customers data.csv')
+df.fillna(0)
 
 #
 # TODO: As instructed, get rid of the 'Channel' and 'Region' columns, since
@@ -79,7 +85,7 @@ def doKMeans(data, clusters=0):
 # KMeans to examine and give weight to them.
 #
 # .. your code here ..
-
+df.drop(['Channel','Region'], axis=1, inplace=True)
 
 #
 # TODO: Before unitizing / standardizing / normalizing your data in preparation for
@@ -87,7 +93,7 @@ def doKMeans(data, clusters=0):
 # .describe() method, or even by using the built-in pandas df.plot.hist()
 #
 # .. your code here ..
-
+#f.plot.hist()
 
 #
 # INFO: Having checked out your data, you may have noticed there's a pretty big gap
@@ -172,11 +178,11 @@ print df.describe()
 #
 # TODO: Un-comment just ***ONE*** of lines at a time and see how alters your results
 # Pay attention to the direction of the arrows, as well as their LENGTHS
-#T = preprocessing.StandardScaler().fit_transform(df)
-#T = preprocessing.MinMaxScaler().fit_transform(df)
+T= preprocessing.StandardScaler().fit_transform(df)
+#T= preprocessing.MinMaxScaler().fit_transform(df)
 #T = preprocessing.MaxAbsScaler().fit_transform(df)
 #T = preprocessing.Normalizer().fit_transform(df)
-T = df # No Change
+#T = df # No Change
 
 
 #
@@ -199,7 +205,7 @@ centroids, labels = doKMeans(T, n_clusters)
 # is good. Print them out before you transform them into PCA space for viewing
 #
 # .. your code here ..
-
+print centroids
 
 # Do PCA *after* to visualize the results. Project the centroids as well as 
 # the samples into the new 2D feature space for visualization purposes.

@@ -7,7 +7,17 @@ import numpy as np
 # Load up the dataset, setting correct header labels.
 #
 # .. your code here ..
-
+df = pd.read_csv('Datasets/census.data', names=['education', 'age', 'capital-gain', 'race', 'capital-loss', 'hours-per-week', 'sex', 'classification'])
+df['capital-gain'] = pd.to_numeric(df['capital-gain'], errors='coerce')
+ordered_classification = ['<=50K', '>50K']
+df.classification = df.classification.astype("category",
+                                             ordered=True,
+                                             categories= ordered_classification).cat.codes
+print df.dtypes
+df = pd.get_dummies(df,columns=['sex','race'])
+print df.education.unique()
+#print df.dtypes
+#print df
 
 
 #

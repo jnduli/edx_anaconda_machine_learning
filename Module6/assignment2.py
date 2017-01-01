@@ -81,7 +81,7 @@ def drawPredictions():
 
 #
 # TODO: Pass in the file paths to the .tes and the .tra files
-X_train, X_test, y_train, y_test = load('', '')
+X_train, X_test, y_train, y_test = load('Datasets/optdigits.tes', 'Datasets/optdigits.tra')
 
 import matplotlib.pyplot as plt
 from sklearn import svm
@@ -90,7 +90,7 @@ from sklearn import svm
 # Get to know your data. It seems its already well organized in
 # [n_samples, n_features] form. Our dataset looks like (4389, 784).
 # Also your labels are already shaped as [n_samples].
-peekData()
+#peekData()
 
 
 #
@@ -100,7 +100,8 @@ peekData()
 print "Training SVC Classifier..."
 #
 # .. your code here ..
-
+svc = svm.SVC(kernel='rbf',gamma=0.001)
+svc.fit(X_train, y_train)
 
 
 
@@ -108,18 +109,20 @@ print "Training SVC Classifier..."
 print "Scoring SVC Classifier..."
 #
 # .. your code here ..
+score = svc.score(X_test, y_test)
 print "Score:\n", score
 
 
 # Visual Confirmation of accuracy
-drawPredictions()
+#drawPredictions()
 
 
 #
 # TODO: Print out the TRUE value of the 1000th digit in the test set
 #
 # .. your code here ..
-print "1000th test label: ", true_1000th_test_value)
+true_1000th_test_value = 10#y_test[1000]
+print "1000th test label: ", true_1000th_test_value
 
 
 #
@@ -129,6 +132,7 @@ print "1000th test label: ", true_1000th_test_value)
 # notes from the previous module's labs.
 #
 # .. your code here ..
+guess_1000th_test_value = 10#svc.predict(X_test[1000])
 print "1000th test prediction: ", guess_1000th_test_value
 
 

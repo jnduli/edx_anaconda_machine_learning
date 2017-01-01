@@ -12,7 +12,7 @@ matplotlib.style.use('ggplot')
 # It's located at 'Datasets/wheat.data'
 # 
 # .. your code here ..
-
+df = pd.read_csv('Datasets/wheat.data')
 
 
 fig = plt.figure()
@@ -25,8 +25,13 @@ fig = plt.figure()
 # 
 # .. your code here ..
 
-
 fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+ax.set_xlabel('area')
+ax.set_ylabel('perimeter')
+ax.set_zlabel('asymmetry')
+ax.scatter(df.area, df.perimeter, df.asymmetry, c='red')
+
 #
 # TODO: Create a new 3D subplot using fig. Then use the
 # subplot to graph a 3D scatter plot using the width,
@@ -35,7 +40,12 @@ fig = plt.figure()
 # axes
 # 
 # .. your code here ..
-
+fig2 = plt.figure()
+ay = fig2.add_subplot(111, projection='3d')
+ay.set_xlabel('width')
+ay.set_ylabel('groove')
+ay.set_zlabel('length')
+ay.scatter(df.width, df.groove, df.length, c='green')
 
 plt.show()
 
